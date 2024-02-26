@@ -1,21 +1,87 @@
-Build the image dev:
+## Project Setup Instructions
 
-`$ docker-compose build`
+### Development Environment Setup
 
-Once the image is built, run the container:
+1. **Build the Development Image:**
 
-`$ docker-compose up -d`
+   Begin by building your development Docker image with the following command:
 
-Navigate to http://localhost:8000/ to again view the welcome screen.
+   ```bash
+   docker-compose build
+   ```
 
-> Check for errors in the logs if this doesn't work via docker-compose logs -f.
+2. **Run the Development Container:**
 
-Bring [down](https://docs.docker.com/compose/reference/down/) the development containers (and the associated volumes with the `-v` flag):
+   Once the image is successfully built, start your development container in detached mode:
 
-`$ docker-compose down -v`
+   ```bash
+   docker-compose up -d
+   ```
 
-Then, build the production images and spin up the containers:
+3. **Accessing the Application:**
 
-`$ docker-compose -f docker-compose.prod.yml up -d --build`
+   With the container running, access the application by navigating to [http://localhost:8000/](http://localhost:8000/) in your web browser. You should see the welcome screen.
 
-Verify that the `hello_django_prod` database was created along with the default Django tables. Test out the admin page at http://localhost:8000/admin. The static files are not being loaded anymore. This is expected since Debug mode is off. We'll fix this shortly.
+   If the application doesn't load, check for potential errors in the container logs:
+
+   ```bash
+   docker-compose logs -f
+   ```
+
+4. **Shutting Down Development Environment:**
+
+   To stop and remove the development containers and associated volumes, use the following command:
+
+   ```bash
+   docker-compose down -v
+   ```
+
+### Production Environment Setup
+
+1. **Building and Running Production Containers:**
+
+   For the production environment, build and start the containers with:
+
+   ```bash
+   docker-compose -f docker-compose.prod.yml up -d --build
+   ```
+
+2. **Database and Django Setup:**
+
+   After the containers are up, ensure the `hello_django_prod` database is created along with the default Django tables by running migrations:
+
+   ```bash
+   docker-compose -f docker-compose.prod.yml exec web python manage.py migrate --noinput
+   ```
+
+   Then, collect static files:
+
+   ```bash
+   docker-compose -f docker-compose.prod.yml exec web python manage.py collectstatic --no-input --clear
+   ```
+
+3. **Verifying Static Files:**
+
+   Requests to static files (e.g., `http://localhost:1337/static/*`) should now be served from the "staticfiles" directory. Verify this by accessing [http://localhost:1337/admin](http://localhost:1337/admin). The static assets should load correctly, indicating that everything is set up properly.
+
+4. **Logging and Troubleshooting:**
+
+   If you encounter issues, consult the logs for more detailed information:
+
+   ```bash
+   docker-compose -f docker-compose.prod.yml logs -f
+   ```
+
+5. **Shutting Down Production Environment:**
+
+   To stop the production containers and remove associated volumes, use the same command as for the development environment:
+
+   ```bash
+   docker-compose down -v
+   ```
+
+### Notes
+
+- Ensure Docker and Docker Compose are installed on your system before beginning the setup process.
+- Adjust the `docker-compose.yml` and `docker-compose.prod.yml` files as necessary to fit your project's requirements.
+- For detailed Docker and Docker Compose documentation, visit [Docker Docs](https://docs.docker.com/).
